@@ -1,6 +1,7 @@
 ---
 import Layout from "../../../../layouts/Layout.astro";
 import booksProprety from "../../../../../data/books.json";
+import VerseNotFound from "../../../../components/VerseNotFound.astro"
 const { book, chapter, verse } = Astro.params;
 
 const bookString = parseInt(book);
@@ -8,33 +9,41 @@ let bookType = "";
 let oneTrans = "";
 let twoTrans = "";
 let originalText = "";
-let hideNextButton = "false";
-let typeOfWriting = ""
-if (bookString < 40) {
-    const NKJVReq = await fetch(
-        `https://bolls.life/get-verse/NKJV/${book}/${chapter}/${verse}/`,
-    );
+let hideBeforeButton = false;
+let hideNextButton = false;
+let typeOfWriting = "";
 
-    const NKJVJson = await NKJVReq.json();
-    oneTrans = NKJVJson.text;
-    console.log(NKJVJson.text);
+let notFound = false;
+if (bookString <= 39) {
+    try {
+        const NKJVReq = await fetch(
+            `https://bolls.life/get-verse/NKJV/${book}/${chapter}/${verse}/`,
+        );
 
-    const LSVReq = await fetch(
-        `https://bolls.life/get-verse/LSV/${book}/${chapter}/${verse}/`,
-    );
-    const LSVJson = await LSVReq.json();
-    twoTrans = LSVJson.text;
+        const NKJVJson = await NKJVReq.json();
+        oneTrans = NKJVJson.text;
 
-    const WLCReq = await fetch(
-        `https://bolls.life/get-verse/WLC/${book}/${chapter}/${verse}/`,
-    );
-    const WLCJson = await WLCReq.json();
-    originalText = WLCJson.text;
-    console.log(WLCJson.text);
-    bookType = "OT";
+        const LSVReq = await fetch(
+            `https://bolls.life/get-verse/LSV/${book}/${chapter}/${verse}/`,
+        );
+        const LSVJson = await LSVReq.json();
+        twoTrans = LSVJson.text;
+
+        const WLCReq = await fetch(
+            `https://bolls.life/get-verse/WLC/${book}/${chapter}/${verse}/`,
+        );
+        const WLCJson = await WLCReq.json();
+        originalText = WLCJson.text;
+        bookType = "OT";
+    } catch {
+        notFound = true
+    }
 }
 
-if (bookString < 67 && bookString >= 40) {
+if (bookString <= 66 && bookString >= 40) {
+    try {
+
+    
     const NKJVReq = await fetch(
         `https://bolls.life/get-verse/NKJV/${book}/${chapter}/${verse}/`,
     );
@@ -53,71 +62,140 @@ if (bookString < 67 && bookString >= 40) {
     const NTGTJson = await NTGTReq.json();
     originalText = NTGTJson.text;
     bookType = "NT";
-    console.log(bookType);
+    } catch {
+        notFound = true
+    }
 }
 
-if (bookString > 67) {
+if (bookString >= 67) {
+
+    try {
     const WEBReq = await fetch(
         `https://bolls.life/get-verse/WEB/${book}/${chapter}/${verse}/`,
     );
 
     const WEBJson = await WEBReq.json();
+    console.log(
+        `https://bolls.life/get-verse/WEB/${book}/${chapter}/${verse}/`,
+    );
     oneTrans = WEBJson.text;
 
     const LXXEReq = await fetch(
         `https://bolls.life/get-verse/LXXE/${book}/${chapter}/${verse}/`,
     );
     const LXXEJson = await LXXEReq.json();
+    console.log(
+        `https://bolls.life/get-verse/WEB/${book}/${chapter}/${verse}/`,
+    );
     twoTrans = LXXEJson.text;
 
     const LXXReq = await fetch(
         `https://bolls.life/get-verse/LXX/${book}/${chapter}/${verse}/`,
     );
     const LXXJson = await LXXReq.json();
-
+    console.log(
+        `https://bolls.life/get-verse/WEB/${book}/${chapter}/${verse}/`,
+    );
     originalText = LXXJson.text;
     bookType = "SEPT";
+    } catch {
+        notFound = true
+    }
 }
 
 if (parseInt(book) > 39 && parseInt(book) < 44) {
-    typeOfWriting = "Gospel according to "
-} else if (parseInt(book) > 44 && parseInt(book) < 65 || parseInt(book) == 72) {
-    typeOfWriting = "Epistle"
+    typeOfWriting = "Gospel according to ";
+} else if (
+    (parseInt(book) > 44 && parseInt(book) < 65) ||
+    parseInt(book) == 72
+) {
+    typeOfWriting = "Epistle";
 } else if ([22, 70, 79, 81, 82, 83].includes(parseInt(book))) {
-    typeOfWriting = "the"
+    typeOfWriting = "the";
 } else {
-    typeOfWriting = "Book of"
+    typeOfWriting = "Book of";
+}
+
+async function findPreviousBookLastChapter(number) {
+    try {
+        const response = await fetch("https://bolls.life/get-books/WEB/");
+        const objects = await response.json();
+        const targetBookId = number - 1;
+        const foundObject = objects.find((obj) => obj.bookid === targetBookId);
+        return foundObject ? foundObject.chapters : null;
+    } catch (error) {
+        console.error(
+            "Error fetching data with findPreviousBookLastChapter:",
+            error,
+        );
+        return null;
+    }
+}
+
+async function findPreviousChapterLastVerse(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+            const lastObject = data[data.length - 1];
+            return lastObject.verse;
+        } else {
+            throw new Error("Data is not an array or is empty.");
+        }
+    } catch (error) {
+        console.error("Error fetching or processing data:", error);
+    }
+}
+
+const previousChapter = await findPreviousBookLastChapter(book);
+const previousVerse = await findPreviousChapterLastVerse(
+    `https://bolls.life/get-text/WEB/${book}/${(parseInt(chapter) - 1).toString()}`,
+);
+
+function previousVerseValue() {
+    if (parseInt(book) == 1 && parseInt(chapter) == 1 && parseInt(verse) == 1) {
+        hideBeforeButton = true;
+        return "";
+    } else if (parseInt(chapter) == 1 && parseInt(verse) == 1) {
+        return `/verse/${(parseInt(book) - 1).toString()}/${previousChapter}/${previousVerse}`;
+    } else if (parseInt(verse) == 1) {
+        return `/verse/${book}/${(parseInt(chapter) - 1).toString()}/${previousVerse}`;
+    } else
+        return `/verse/${book}/${chapter}/${(parseInt(verse) - 1).toString()}`;
 }
 
 async function followingVerseValue() {
-    const nextVerseUrl = `/${book}/${chapter}/${(parseInt(verse) + 1).toString}/`;
+    const nextVerseUrl = `/${book}/${chapter}/${(parseInt(verse) + 1).toString()}/`;
     const firstResponse = await fetch(
         "https://bolls.life/get-verse/WEB" + nextVerseUrl,
     );
+
     if (firstResponse.status !== 404) {
         return "/verse" + nextVerseUrl;
     } else {
-        const nextChapterUrl = `/${book}/${(parseInt(chapter) + 1).toString}/1/`;
+        const nextChapterUrl = `/${book}/${(parseInt(chapter) + 1).toString()}/1/`;
         const secondResponse = await fetch(
             "https://bolls.life/get-verse/WEB" + nextChapterUrl,
         );
         if (secondResponse.status !== 404) {
             return "/verse" + nextChapterUrl;
         } else {
-            const nextBookUrl = `/${book}/${(parseInt(chapter) + 1).toString}/1/`;
+            const nextBookUrl = `/${book}/${(parseInt(chapter) + 1).toString()}/1/`;
             const thirdResponse = await fetch(
                 "https://bolls.life/get-verse/WEB" + nextBookUrl,
             );
             if (thirdResponse.status !== 404) {
                 return "/verse" + nextBookUrl;
             } else {
-                hideNextButton = "true";
+                hideNextButton = true;
                 return "";
             }
         }
     }
 }
-
 
 function getBookNameById(books, bookId) {
     const book = books.find((b) => b.bookid == bookId);
@@ -125,21 +203,28 @@ function getBookNameById(books, bookId) {
 }
 
 const title = getBookNameById(booksProprety, book);
+
+let previousLink = previousVerseValue();
+let followingLink = await followingVerseValue();
 ---
 
 <Layout>
+    {notFound ? <VerseNotFound /> :
     <main>
         <div style="flex: 1;">
             <div
                 style="display: flex; align-items: center; justify-content:center;"
             >
                 <div class="bubble">
-                    <p>From the {typeOfWriting} {title}, Chapter {chapter}:{verse}</p>
+                    <p>
+                        From the {typeOfWriting}
+                        {title}, Chapter {chapter}:{verse}
+                    </p>
                 </div>
             </div>
             <h2></h2>
             <div class="bubble">
-                <p dir={bookType == "OT" ? "rtl" : "ltr"}> {originalText}</p>
+                <p dir={bookType == "OT" ? "rtl" : "ltr"}>{originalText}</p>
             </div>
         </div>
         <div style="flex: 1;">
@@ -161,6 +246,14 @@ const title = getBookNameById(booksProprety, book);
                 }
             </h2>
             <p class="bubble">{twoTrans}</p>
+            <div style="display: flex; align-items: center;">
+                <div class={hideBeforeButton ? "hidden" : "bubble"}>
+                    <a href={previousLink}>Previous Verse</a>
+                </div>
+                <div class={hideNextButton ? "hidden" : "bubble"}>
+                    <a href={followingLink}>Following Verse</a>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -198,5 +291,10 @@ const title = getBookNameById(booksProprety, book);
             background-color: #283034;
         }
 
+        .hidden {
+            visibility: hidden;
+            display: none;
+        }
     </style>
+    }
 </Layout>
