@@ -12,13 +12,18 @@ import Navbar from "../components/Navbar.astro"
     </head>
     <body style="font-family: closer;">
         <Navbar />
-        <slot />
+        <div id="content">
+            <slot />
+        </div>
+        
     </body>
     <style>
 
         html, body {
             margin: 0;
             padding: 0;
+            background-color: #202327;
+            color: white;
         }
         @font-face {
             font-family: "closer";
@@ -27,5 +32,11 @@ import Navbar from "../components/Navbar.astro"
             font-style: normal;
             font-display: swap;
         }
+
+        #content {
+            margin: 10px;
+            padding: 10px;
+        }
+
     </style>
 </html>

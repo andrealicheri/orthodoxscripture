@@ -1,5 +1,6 @@
 ---
 import Layout from "../../../../layouts/Layout.astro";
+import booksProprety from "../../../../../data/books.json";
 const { book, chapter, verse } = Astro.params;
 
 const bookString = parseInt(book);
@@ -7,6 +8,8 @@ let bookType = "";
 let oneTrans = "";
 let twoTrans = "";
 let originalText = "";
+let hideNextButton = "false";
+let typeOfWriting = ""
 if (bookString < 40) {
     const NKJVReq = await fetch(
         `https://bolls.life/get-verse/NKJV/${book}/${chapter}/${verse}/`,
@@ -31,7 +34,7 @@ if (bookString < 40) {
     bookType = "OT";
 }
 
-if (bookString < 67 && bookString > 40) {
+if (bookString < 67 && bookString >= 40) {
     const NKJVReq = await fetch(
         `https://bolls.life/get-verse/NKJV/${book}/${chapter}/${verse}/`,
     );
@@ -75,11 +78,73 @@ if (bookString > 67) {
     originalText = LXXJson.text;
     bookType = "SEPT";
 }
+
+if (parseInt(book) > 39 && parseInt(book) < 44) {
+    typeOfWriting = "Gospel according to "
+} else if (parseInt(book) > 44 && parseInt(book) < 65 || parseInt(book) == 72) {
+    typeOfWriting = "Epistle"
+} else if ([22, 70, 79, 81, 82, 83].includes(parseInt(book))) {
+    typeOfWriting = "the"
+} else {
+    typeOfWriting = "Book of"
+}
+
+async function followingVerseValue() {
+    const nextVerseUrl = `/${book}/${chapter}/${(parseInt(verse) + 1).toString}/`;
+    const firstResponse = await fetch(
+        "https://bolls.life/get-verse/WEB" + nextVerseUrl,
+    );
+    if (firstResponse.status !== 404) {
+        return "/verse" + nextVerseUrl;
+    } else {
+        const nextChapterUrl = `/${book}/${(parseInt(chapter) + 1).toString}/1/`;
+        const secondResponse = await fetch(
+            "https://bolls.life/get-verse/WEB" + nextChapterUrl,
+        );
+        if (secondResponse.status !== 404) {
+            return "/verse" + nextChapterUrl;
+        } else {
+            const nextBookUrl = `/${book}/${(parseInt(chapter) + 1).toString}/1/`;
+            const thirdResponse = await fetch(
+                "https://bolls.life/get-verse/WEB" + nextBookUrl,
+            );
+            if (thirdResponse.status !== 404) {
+                return "/verse" + nextBookUrl;
+            } else {
+                hideNextButton = "true";
+                return "";
+            }
+        }
+    }
+}
+
+
+function getBookNameById(books, bookId) {
+    const book = books.find((b) => b.bookid == bookId);
+    return book ? book.name : null; // Returns the name or null if not found
+}
+
+const title = getBookNameById(booksProprety, book);
 ---
 
 <Layout>
     <main>
         <div style="flex: 1;">
+            <div
+                style="display: flex; align-items: center; justify-content:center;"
+            >
+                <div class="bubble">
+                    <p>From the {typeOfWriting} {title}, Chapter {chapter}:{verse}</p>
+                </div>
+            </div>
+            <h2></h2>
+            <div class="bubble">
+                <p dir={bookType == "OT" ? "rtl" : "ltr"}> {originalText}</p>
+            </div>
+        </div>
+        <div style="flex: 1;">
+            <h2 style="text-align: center;">Translations</h2>
+
             <h2>
                 {
                     bookType == "OT" || bookType == "NT"
@@ -87,7 +152,7 @@ if (bookString > 67) {
                         : "Common English Bible"
                 }
             </h2>
-            <p>{oneTrans}</p>
+            <p class="bubble">{oneTrans}</p>
             <h2>
                 {
                     bookType == "OT" || bookType == "NT"
@@ -95,17 +160,22 @@ if (bookString > 67) {
                         : "English Version of the Septuagint"
                 }
             </h2>
-            <p>{twoTrans}</p>
-        </div>
-        <div style="flex: 1;">
-            <h2>Original Text</h2>
-            <p>{originalText}</p>
+            <p class="bubble">{twoTrans}</p>
         </div>
     </main>
 
     <style>
         main {
             display: flex;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            /* Adjust width for your needs */
+            main {
+                flex-direction: column; /* Stack items vertically on smaller screens */
+                align-items: center; /* Center items horizontally */
+            }
         }
         @font-face {
             font-family: "LXX";
@@ -121,5 +191,12 @@ if (bookString > 67) {
             font-style: normal;
             font-display: swap;
         }
+
+        .bubble {
+            padding: 20px;
+            border-radius: 25px;
+            background-color: #283034;
+        }
+
     </style>
 </Layout>
