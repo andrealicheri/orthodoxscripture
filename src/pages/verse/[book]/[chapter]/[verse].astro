@@ -1,0 +1,125 @@
+---
+import Layout from "../../../../layouts/Layout.astro";
+const { book, chapter, verse } = Astro.params;
+
+const bookString = parseInt(book);
+let bookType = "";
+let oneTrans = "";
+let twoTrans = "";
+let originalText = "";
+if (bookString < 40) {
+    const NKJVReq = await fetch(
+        `https://bolls.life/get-verse/NKJV/${book}/${chapter}/${verse}/`,
+    );
+
+    const NKJVJson = await NKJVReq.json();
+    oneTrans = NKJVJson.text;
+    console.log(NKJVJson.text);
+
+    const LSVReq = await fetch(
+        `https://bolls.life/get-verse/LSV/${book}/${chapter}/${verse}/`,
+    );
+    const LSVJson = await LSVReq.json();
+    twoTrans = LSVJson.text;
+
+    const WLCReq = await fetch(
+        `https://bolls.life/get-verse/WLC/${book}/${chapter}/${verse}/`,
+    );
+    const WLCJson = await WLCReq.json();
+    originalText = WLCJson.text;
+    console.log(WLCJson.text);
+    bookType = "OT";
+}
+
+if (bookString < 67 && bookString > 40) {
+    const NKJVReq = await fetch(
+        `https://bolls.life/get-verse/NKJV/${book}/${chapter}/${verse}/`,
+    );
+    const NKJVJson = await NKJVReq.json();
+    oneTrans = NKJVJson.text;
+
+    const LSVReq = await fetch(
+        `https://bolls.life/get-verse/LSV/${book}/${chapter}/${verse}/`,
+    );
+    const LSVJson = await LSVReq.json();
+    twoTrans = LSVJson.text;
+
+    const NTGTReq = await fetch(
+        `https://bolls.life/get-verse/NTGT/${book}/${chapter}/${verse}/`,
+    );
+    const NTGTJson = await NTGTReq.json();
+    originalText = NTGTJson.text;
+    bookType = "NT";
+    console.log(bookType);
+}
+
+if (bookString > 67) {
+    const WEBReq = await fetch(
+        `https://bolls.life/get-verse/WEB/${book}/${chapter}/${verse}/`,
+    );
+
+    const WEBJson = await WEBReq.json();
+    oneTrans = WEBJson.text;
+
+    const LXXEReq = await fetch(
+        `https://bolls.life/get-verse/LXXE/${book}/${chapter}/${verse}/`,
+    );
+    const LXXEJson = await LXXEReq.json();
+    twoTrans = LXXEJson.text;
+
+    const LXXReq = await fetch(
+        `https://bolls.life/get-verse/LXX/${book}/${chapter}/${verse}/`,
+    );
+    const LXXJson = await LXXReq.json();
+
+    originalText = LXXJson.text;
+    bookType = "SEPT";
+}
+---
+
+<Layout>
+    <main>
+        <div style="flex: 1;">
+            <h2>
+                {
+                    bookType == "OT" || bookType == "NT"
+                        ? "New King James Version"
+                        : "Common English Bible"
+                }
+            </h2>
+            <p>{oneTrans}</p>
+            <h2>
+                {
+                    bookType == "OT" || bookType == "NT"
+                        ? "Literal Standard Version"
+                        : "English Version of the Septuagint"
+                }
+            </h2>
+            <p>{twoTrans}</p>
+        </div>
+        <div style="flex: 1;">
+            <h2>Original Text</h2>
+            <p>{originalText}</p>
+        </div>
+    </main>
+
+    <style>
+        main {
+            display: flex;
+        }
+        @font-face {
+            font-family: "LXX";
+            src: url("/fonts/KoineGreek.ttf") format("ttf");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: "WLCa";
+            src: url("/fonts/Hebrew.ttf") format("ttf");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+    </style>
+</Layout>
