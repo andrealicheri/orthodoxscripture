@@ -1,0 +1,145 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import ChapterNotFound from "../../../components/ChapterNotFound.astro"
+import booksProprety from "../../../../data/books.json"
+const { book, chapter } = Astro.params;
+
+let bookType = "";
+let typeOfWriting = ""
+let originalArray = []
+let transArray = []
+let notFound = false;
+const bookString = parseInt(book);
+
+if (bookString <= 39) {
+    try {
+        const LSVReq = await fetch(
+            `https://bolls.life/get-text/LSV/${book}/${chapter}/`,
+        );
+        transArray = await LSVReq.json();
+
+        const WLCReq = await fetch(
+            `https://bolls.life/get-text/WLC/${book}/${chapter}/`,
+        );
+        originalArray = await WLCReq.json();
+        bookType = "OT";
+    } catch {
+        notFound = true;
+    }
+}
+
+if (bookString <= 66 && bookString >= 40) {
+    try {
+        const LSVReq = await fetch(
+            `https://bolls.life/get-text/LSV/${book}/${chapter}/`,
+        );
+        transArray = await LSVReq.json();
+
+        const NTGTReq = await fetch(
+            `https://bolls.life/get-text/NTGT/${book}/${chapter}/`,
+        );
+        originalArray = await NTGTReq.json();
+        bookType = "NT";
+    } catch {
+        notFound = true;
+    }
+}
+
+if (bookString >= 67) {
+    try {
+        const LXXEReq = await fetch(
+            `https://bolls.life/get-text/LXXE/${book}/${chapter}/`,
+        );
+        transArray = await LXXEReq.json();
+        const LXXReq = await fetch(
+            `https://bolls.life/get-text/LXX/${book}/${chapter}`,
+        );
+        originalArray = await LXXReq.json();
+        bookType = "SEPT";
+    } catch {
+        notFound = true;
+    }
+}
+
+function getBookNameById(books, bookId) {
+    const book = books.find((b) => b.bookid == bookId);
+    return book ? book.name : null; // Returns the name or null if not found
+}
+
+if (parseInt(book) > 39 && parseInt(book) < 44) {
+    typeOfWriting = "Gospel according to ";
+} else if (
+    (parseInt(book) > 44 && parseInt(book) < 65) ||
+    parseInt(book) == 72
+) {
+    typeOfWriting = "Epistle";
+} else if ([22, 70, 79, 81, 82, 83].includes(parseInt(book))) {
+    typeOfWriting = "";
+} else {
+    typeOfWriting = "Book of";
+}
+
+const title = getBookNameById(booksProprety, book);
+const numberOfVerses = Array.from({ length: originalArray.length }, (_, index) => index);
+
+
+---
+
+<Layout>
+
+    {notFound ? <ChapterNotFound /> :
+    <main>
+        <div class="center">
+            <h2 class="bubble">The Chapter {chapter} of the {typeOfWriting} {title} </h2>
+        </div>
+        <div class="verse-table">
+            {numberOfVerses.map((index) => (
+                  <div class="verse-item"><a href={`/verse/${book}/${chapter}/${originalArray[index].verse}`}>{title} {chapter}:{originalArray[index].verse}</a> (Original Text)</div>
+                  <div class="verse-item"><a href={`/verse/${book}/${chapter}/${transArray[index].verse}`}>{title} {chapter}:{transArray[index].verse}</a> ({bookString >= 67 ? "LXXE" : "LSV"})</div>
+                  <div class="verse-item" dir={bookString <= 39 ? "rtl" : "ltr"}>{originalArray[index].text}</div>
+                  <div class="verse-item">{transArray[index].text}</div>
+            ))}
+        </div>
+    </main>
+    }
+    <style>
+        main {
+            gap: 20px;
+        }
+
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+        }
+        .bubble {
+            padding: 20px;
+            border-radius: 25px;
+            background-color: #283034;
+        }
+
+        .hidden {
+            visibility: hidden;
+            display: none;
+        }
+
+        a {
+            color: white;
+        }
+
+        .verse-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-radius: 25px;
+        }
+
+
+
+        .verse-item {
+            padding: 20px;
+            border: 2px solid #283034;
+        }
+    </style>
+
+</Layout>
