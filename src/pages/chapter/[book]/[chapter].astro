@@ -2,10 +2,13 @@
 import Layout from "../../../layouts/Layout.astro";
 import ChapterNotFound from "../../../components/ChapterNotFound.astro"
 import booksProprety from "../../../../data/books.json"
+import { undefined } from "astro:schema";
 const { book, chapter } = Astro.params;
 
 let bookType = "";
 let typeOfWriting = ""
+let hideBeforeButton = false;
+let hideNextButton = false;
 let originalArray = []
 let transArray = []
 let notFound = false;
@@ -82,7 +85,59 @@ if (parseInt(book) > 39 && parseInt(book) < 44) {
 const title = getBookNameById(booksProprety, book);
 const numberOfVerses = Array.from({ length: originalArray.length }, (_, index) => index);
 
+async function findPreviousBookLastChapter(number) {
+    try {
+        const response = await fetch("https://bolls.life/get-books/WEB/");
+        const objects = await response.json();
+        const targetBookId = number - 1;
+        const foundObject = objects.find((obj) => obj.bookid === targetBookId);
+        return foundObject ? foundObject.chapters : null;
+    } catch (error) {
+        console.error(
+            "Error fetching data with findPreviousBookLastChapter:",
+            error,
+        );
+        return null;
+    }
+}
 
+const previousChapter = await findPreviousBookLastChapter(book);
+
+function previousChapterValue() {
+    if (parseInt(book) == 1 && parseInt(chapter) == 1) {
+        hideBeforeButton = true;
+        return "";
+    } else if (parseInt(chapter) == 1) {
+        return `/chapter/${(parseInt(book) - 1).toString()}/${previousChapter}/`;
+    } else
+        return `/chapter/${book}/${(parseInt(chapter) - 1).toString()}/`;
+}
+
+async function followingChapterValue() {
+        const nextChapterUrl = `/${book}/${(parseInt(chapter) + 1).toString()}/`;
+        const secondResponse = await fetch(
+            "https://bolls.life/get-text/WEB" + nextChapterUrl,
+        );
+        let secondResponseValue = await secondResponse.json()
+        if (secondResponse.status !== 404 && secondResponseValue.length != 0) {
+            return "/chapter" + nextChapterUrl;
+        } else {
+            const nextBookUrl = `/${parseInt(book) + 1}/1/`;
+            const thirdResponse = await fetch(
+                "https://bolls.life/get-text/WEB" + nextBookUrl,
+            );
+            let thirdResponseValue = await thirdResponse.json()
+            if (thirdResponse.status !== 404 && thirdResponseValue.length != 0) {
+                return "/chapter" + nextBookUrl;
+            } else {
+                hideNextButton = true;
+                return "";
+            }
+        }
+}
+
+let previousLink = previousChapterValue()
+let followingLink = await followingChapterValue()
 ---
 
 <Layout>
@@ -92,6 +147,16 @@ const numberOfVerses = Array.from({ length: originalArray.length }, (_, index) =
         <div class="center">
             <h2 class="bubble">The Chapter {chapter} of the {typeOfWriting} {title} </h2>
         </div>
+        <p></p>
+        <div style="display: flex; align-items: center; justify-content: center; width: 98vw; gap: 15px">
+            <div class={hideBeforeButton ? "hidden" : "bubble"}>
+                <a href={previousLink}>Previous Chapter</a>
+            </div>
+            <div class={hideNextButton ? "hidden" : "bubble"}>
+                <a href={followingLink}>Following Chapter</a>
+            </div>
+        </div>
+        <p></p>
         <div class="verse-table">
             {numberOfVerses.map((index) => (
                   <div class="verse-item"><a href={`/verse/${book}/${chapter}/${originalArray[index].verse}`}>{title} {chapter}:{originalArray[index].verse}</a> (Original Text)</div>
@@ -99,6 +164,15 @@ const numberOfVerses = Array.from({ length: originalArray.length }, (_, index) =
                   <div class="verse-item" dir={bookString <= 39 ? "rtl" : "ltr"}>{originalArray[index].text}</div>
                   <div class="verse-item">{transArray[index].text}</div>
             ))}
+        </div>
+        <p></p>
+        <div style="display: flex; align-items: center; justify-content: center; width: 98vw; gap: 15px">
+            <div class={hideBeforeButton ? "hidden" : "bubble"}>
+                <a href={previousLink}>Previous Chapter</a>
+            </div>
+            <div class={hideNextButton ? "hidden" : "bubble"}>
+                <a href={followingLink}>Following Chapter</a>
+            </div>
         </div>
     </main>
     }
@@ -111,7 +185,7 @@ const numberOfVerses = Array.from({ length: originalArray.length }, (_, index) =
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100vw;
+            width: 98vw;
         }
         .bubble {
             padding: 20px;
