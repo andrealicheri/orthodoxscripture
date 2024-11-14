@@ -1,17 +1,88 @@
 ---
-
+import Layout from "../layouts/Layout.astro";
+import booksProprety from "../../data/books.json";
+import councilProprety from "../../data/councils.json"
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-	
-</html>
+<Layout>
+	<div>
+		<h3 style="text-align: center;">
+			<i
+				>"So, then, brothers, stand fast, and hold the traditions that
+				you were taught, whether through word, whether through our
+				letter"</i
+			>
+		</h3>
+		<p style="text-align: center;"><i>2 Thessalonians 2:15, LSV</i></p>
+	</div>
+	<p><br><br><br></p>
+	<div>
+		<h2 style="text-align: center;"><b>BOOKS OF THE OLD TESTAMENT</b></h2>
+		<div class="grid">
+			{
+				booksProprety.slice(0, 39).map((book) => (
+					<p class="bubble">
+						<a href={"/chapter/" + book.bookid.toString() + "/1"}>{book.name}</a>
+					</p>
+				))
+			}
+		</div>
+	</div>
+	<div>
+		<h2 style="text-align: center;"><b>BOOKS OF THE NEW TESTAMENT</b></h2>
+		<div class="grid">
+			{
+				booksProprety.slice(40, 66).map((book) => (
+					<p class="bubble">
+						<a href={"/chapter/" + book.bookid.toString() + "/1"}>{book.name}</a>
+					</p>
+				))
+			}
+		</div>
+	</div>
+	<div>
+		<h2 style="text-align: center;"><b>DEUTEROCANON</b></h2>
+		<div class="grid">
+			{
+				booksProprety.slice(67, 80).map((book) => (
+					<p class="bubble">
+						<a href={"/chapter/" + book.bookid.toString() + "/1"}>{book.name}</a>
+					</p>
+				))
+			}
+		</div>
+	</div>
+	<div>
+		<h2 style="text-align: center;"><b>COUNCILS AND SYNODS</b></h2>
+		<div class="grid">
+
+        {Object.entries(councilProprety[0]).map(([key, value]) => (
+
+            		<p class="bubble">
+						<a href={"/council/" + key}>{value} {[12, 13].includes(parseInt(key)) ? "2" : ""}</a>
+					</p>
+        ))}
+			
+		</div>
+	</div>
+
+
+	<style>
+		.grid {
+			display: grid;
+			gap: 10px;
+			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		}
+
+		.bubble {
+            padding: 20px;
+            border-radius: 20px;
+            background-color: #283034;
+        }
+		
+		a {
+			color: white;
+		}
+
+	</style>
+</Layout>

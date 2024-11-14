@@ -1,0 +1,86 @@
+---
+// Import JSON files manually
+import councilsProprety from "../../../data/councils.json"
+import Layout from '../../layouts/Layout.astro';
+import ancyra from '../../../data/councils/ancyra.json';
+import carthage from '../../../data/councils/carthage.json';
+import chalcedon from '../../../data/councils/chalcedon.json';
+import costantinople1 from '../../../data/councils/costantinople1.json';
+import costantinople2 from '../../../data/councils/costantinople2.json';
+import ephesus from '../../../data/councils/ephesus.json';
+import gangra from '../../../data/councils/gangra.json';
+import laodecia from '../../../data/councils/laodecia.json';
+import neocesarea from '../../../data/councils/neocesarea.json';
+import nicea1 from '../../../data/councils/nicea1.json';
+import nicea2 from '../../../data/councils/nicea2.json';
+import serdica from '../../../data/councils/sardica.json';
+import antioch from "../../../data/councils/anthioch.json"
+import trullo from "../../../data/councils/trullo.json"
+
+// Place the JSON data into an array, assigning a number starting from 1
+const councilsData = [
+  ancyra,
+  neocesarea,
+  nicea1,
+  gangra,
+  antioch,
+  serdica,
+  laodecia,
+  costantinople1,
+  ephesus,
+  carthage,
+  chalcedon,
+  trullo,
+  costantinople2,
+  nicea2,
+];
+
+
+const { council } = Astro.params;
+const councilIndex = parseInt(council) - 1; // Convert to index (1-based to 0-based)
+
+// Select the correct array based on the URL parameter (with a fallback)
+const displayData = councilsData[councilIndex] || [];
+console.log(council)
+console.log(displayData)
+---
+<Layout>
+    <div class="center">
+        <h2 class="bubble">The {[13, 14].includes(parseInt(council)) ? "Second" : ""} Holy {[3, 8, 9, 11, 12, 13, 14].includes(parseInt(council)) ? "Council" : "Synod"} of {councilsProprety[0][council.toString()]}</h2>
+    </div>
+  <div class="verse-table">
+    {displayData.map((item) => (
+        <div class="verse-item">Canon {item.number}</div>
+        <div class="verse-item">{item.text}</div>
+      ))}
+  </div>
+
+  
+
+  <style>
+        .verse-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-radius: 25px;
+        }
+
+
+
+        .verse-item {
+            padding: 20px;
+            border: 2px solid #283034;
+        }
+
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 98vw;
+        }
+        .bubble {
+            padding: 20px;
+            border-radius: 25px;
+            background-color: #283034;
+        }
+  </style>
+</Layout>
