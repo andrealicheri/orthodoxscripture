@@ -18,7 +18,7 @@ The largest collection of Easter Orthodox scripture in one website.
 - [ ] Referencing System
 - [ ] TOR
 
-## "Pages are slow"
+### "Pages are slow"
 
 Fetching is all done on the server side to allow JS-free browsing in safe enviornements like TOR. Taking in consideration that when you fetch a verse with the `/verse` route, the server has to make three requests to bolls.life for Bible verses and filter commentaries from Catena. This takes about 3 seconds, and all of the other routes are way faster. 
 
