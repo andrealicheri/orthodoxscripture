@@ -1,7 +1,7 @@
 ---
-import Layout from "../../../layouts/Layout.astro";
-import ChapterNotFound from "../../../components/ChapterNotFound.astro"
-import booksProprety from "../../../../data/books.json"
+import Layout from "../../../../layouts/Layout.astro";
+import ChapterNotFound from "../../../../components/ChapterNotFound.astro"
+import booksProprety from "../../../../../data/books.json"
 import { undefined } from "astro:schema";
 const { book, chapter } = Astro.params;
 
@@ -108,9 +108,9 @@ function previousChapterValue() {
         hideBeforeButton = true;
         return "";
     } else if (parseInt(chapter) == 1) {
-        return `/chapter/${(parseInt(book) - 1).toString()}/${previousChapter}/`;
+        return `/bible/chapter/${(parseInt(book) - 1).toString()}/${previousChapter}/`;
     } else
-        return `/chapter/${book}/${(parseInt(chapter) - 1).toString()}/`;
+        return `/bible/chapter/${book}/${(parseInt(chapter) - 1).toString()}/`;
 }
 
 async function followingChapterValue() {
@@ -159,8 +159,8 @@ let followingLink = await followingChapterValue()
         <p></p>
         <div class="verse-table">
             {numberOfVerses.map((index) => (
-                  <div class="verse-item"><a href={`/verse/${book}/${chapter}/${originalArray[index].verse}`}>{title} {chapter}:{originalArray[index].verse}</a> (Original Text)</div>
-                  <div class="verse-item"><a href={`/verse/${book}/${chapter}/${transArray[index].verse}`}>{title} {chapter}:{transArray[index].verse}</a> ({bookString >= 67 ? "LXXE" : "LSV"})</div>
+                  <div class="verse-item"><a href={`/bible/verse/${book}/${chapter}/${originalArray[index].verse}`}>{title} {chapter}:{originalArray[index].verse}</a> (Original Text)</div>
+                  <div class="verse-item"><a href={`/bible/verse/${book}/${chapter}/${transArray[index].verse}`}>{title} {chapter}:{transArray[index].verse}</a> ({bookString >= 67 ? "LXXE" : "LSV"})</div>
                   <div class="verse-item" dir={bookString <= 39 ? "rtl" : "ltr"}>{originalArray[index].text}</div>
                   <div class="verse-item">{transArray[index].text}</div>
             ))}

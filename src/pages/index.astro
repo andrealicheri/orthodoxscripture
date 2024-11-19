@@ -2,6 +2,10 @@
 import Layout from "../layouts/Layout.astro";
 import booksProprety from "../../data/books.json";
 import councilProprety from "../../data/councils.json"
+
+const anteNicea = ["01", "02", "03", "04", "05", "06", "07", "08"]
+const postNicea1 = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14"]
+const postNicea2 = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"]
 ---
 
 <Layout>
@@ -22,7 +26,7 @@ import councilProprety from "../../data/councils.json"
 			{
 				booksProprety.slice(0, 39).map((book) => (
 					<p class="bubble">
-						<a href={"/chapter/" + book.bookid.toString() + "/1"}>{book.name}</a>
+						<a href={"/bible/chapter/" + book.bookid.toString() + "/1"}>{book.name}</a>
 					</p>
 				))
 			}
@@ -34,7 +38,7 @@ import councilProprety from "../../data/councils.json"
 			{
 				booksProprety.slice(40, 66).map((book) => (
 					<p class="bubble">
-						<a href={"/chapter/" + book.bookid.toString() + "/1"}>{book.name}</a>
+						<a href={"/bible/chapter/" + book.bookid.toString() + "/1"}>{book.name}</a>
 					</p>
 				))
 			}
@@ -46,7 +50,7 @@ import councilProprety from "../../data/councils.json"
 			{
 				booksProprety.slice(67, 80).map((book) => (
 					<p class="bubble">
-						<a href={"/chapter/" + book.bookid.toString() + "/1"}>{book.name}</a>
+						<a href={"/bible/chapter/" + book.bookid.toString() + "/1"}>{book.name}</a>
 					</p>
 				))
 			}
@@ -59,10 +63,41 @@ import councilProprety from "../../data/councils.json"
         {Object.entries(councilProprety[0]).map(([key, value]) => (
 
             		<p class="bubble">
-						<a href={"/council/" + key}>{value} {[12, 13].includes(parseInt(key)) ? "2" : ""}</a>
+						<a href={"/council/" + key}>{value} {[13, 14].includes(parseInt(key)) ? "2" : ""}</a>
 					</p>
         ))}
 			
+		</div>
+	</div>
+	<div>
+		<h2 style="text-align: center;"><b>ANTE-NICEAN FATHERS</b></h2>
+		<div class="grid">
+			{
+				anteNicea.map((book) => (
+					<p class="bubble">
+						<a href={`/fathers/anf${book}/anf${book}.i`}>Volume {book}</a>
+					</p>
+				))
+			}
+		</div>
+	</div>
+	<div>
+		<h2 style="text-align: center;"><b>NICEAN AND POST FATHERS</b></h2>
+		<div class="grid">
+			{
+				postNicea1.map((book) => (
+					<p class="bubble">
+						<a href={`/fathers/npnf1${book}/npnf1${book}.i`}>Series 1, Volume {book}</a>
+					</p>
+				))
+			}
+			{
+				postNicea2.map((book) => (
+					<p class="bubble">
+						<a href={`/fathers/npnf2${book}/npnf2${book}.i`}>Series 2, Volume {book}</a>
+					</p>
+				))
+			}
 		</div>
 	</div>
 

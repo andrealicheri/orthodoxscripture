@@ -1,0 +1,115 @@
+---
+// @ts-nocheck
+import Layout from "../../../layouts/Layout.astro";
+import sanitizeHtml from 'sanitize-html';
+
+const {volume, id} = Astro.params
+
+let match
+
+const request = await fetch(`https://ccel.org/ccel/schaff/${volume}/${id}.html?html`)
+console.log(`https://ccel.org/ccel/schaff/${volume}/${id}.html?html`)
+const content = await request.text()
+
+const previousRegex = /<a[^>]*href=["']([^"']*)["'][^>]*name=["']prevNav["'][^>]*>/g;
+const nextRegex = /<a[^>]*href=["']([^"']*)["'][^>]*name=["']nextNav["'][^>]*>/g;
+
+const prevMatches = [];
+
+while ((match = previousRegex.exec(content)) !== null) {
+  prevMatches.push(match[1]); // Push the captured href value
+}
+const nextMatches = [];
+while ((match = nextRegex.exec(content)) !== null) {
+  nextMatches.push(match[1]); // Push the captured href value
+}
+
+const previousLink = prevMatches[0]
+const followingLink = nextMatches[0]
+
+
+function getFormattedTitle(inputString) {
+    if (!inputString || typeof inputString !== "string") {
+        return "Invalid input";
+    }
+
+    const anfPattern = /^anf(\d{2})\.(.*?)\.html$/i; 
+    const npnfPattern = /^npnf(\d)(\d{2})\.(.*?)\.html$/i; 
+
+    if (anfPattern.test(inputString)) {
+        const match = inputString.match(anfPattern);
+        const volumeNumber = match[1];
+        const book = match[2].toUpperCase();
+        return `Anti Nicene Fathers, Book ${volumeNumber}, Reference ${book}`;
+    }
+
+    if (npnfPattern.test(inputString)) {
+        const match = inputString.match(npnfPattern);
+        const seriesNumber = match[1] === "1" ? 1 : 2;
+        const volumeNumber = match[2];
+        const book = match[3].toUpperCase();
+        return `Nicene and Post-Nicene Fathers, Series ${seriesNumber}, Book ${volumeNumber}, Reference ${book}`;
+    }
+
+    return "String format not recognized";
+}
+
+
+
+---
+
+<Layout>
+    <main>
+        <div class="center">
+            <h2 class="bubble">{getFormattedTitle(id + ".html")}</h2>
+        </div>
+        <p></p>
+
+        <div style="display: flex; align-items: center; justify-content: center; width: 98vw; gap: 15px">
+            <div>
+                <a href={previousLink} class="bubble">Previous Chapter</a>
+            </div>
+            <div>
+                <a href={followingLink} class="bubble">Following Chapter</a>
+            </div>
+        </div>
+        <br /> <br />
+        <div set:html={sanitizeHtml(content.replace(/<(?<tag>\w+)[^>]*\bid\s*=\s*"(book_navbar_top|book_navbar_bottom)"[^>]*>.*?<\/\k<tag>>/gs, ''), {allowedTags: sanitizeHtml.defaults.allowedTags.filter(element => element != "a")})}></div>
+        <br /> <br /> 
+        <div style="display: flex; align-items: center; justify-content: center; width: 98vw; gap: 15px">
+            <div>
+                <a href={previousLink} class="bubble">Previous Chapter</a>
+            </div>
+            <div>
+                <a href={followingLink} class="bubble">Following Chapter</a>
+            </div>
+        </div>
+    </main>
+
+    <style>
+        main {
+            gap: 20px;
+        }
+
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 98vw;
+        }
+        .bubble {
+            padding: 20px;
+            border-radius: 25px;
+            background-color: #283034;
+        }
+
+        .hidden {
+            visibility: hidden;
+            display: none;
+        }
+
+        a {
+            color: white;
+        }
+    </style>
+</Layout>

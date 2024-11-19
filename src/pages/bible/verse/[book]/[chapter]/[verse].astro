@@ -1,8 +1,8 @@
 ---
-import Layout from "../../../../layouts/Layout.astro";
-import booksProprety from "../../../../../data/books.json";
-import catenaAbbreviations from "../../../../../data/catenaAbbreviations.json";
-import VerseNotFound from "../../../../components/VerseNotFound.astro";
+import Layout from "../../../../../layouts/Layout.astro";
+import booksProprety from "../../../../../../data/books.json";
+import catenaAbbreviations from "../../../../../../data/catenaAbbreviations.json";
+import VerseNotFound from "../../../../../components/VerseNotFound.astro";
 const { book, chapter, verse } = Astro.params;
 
 const bookString = parseInt(book);
@@ -174,11 +174,11 @@ function previousVerseValue() {
         hideBeforeButton = true;
         return "";
     } else if (parseInt(chapter) == 1 && parseInt(verse) == 1) {
-        return `/verse/${(parseInt(book) - 1).toString()}/${previousChapter}/${previousVerse}`;
+        return `/bible/verse/${(parseInt(book) - 1).toString()}/${previousChapter}/${previousVerse}`;
     } else if (parseInt(verse) == 1) {
-        return `/verse/${book}/${(parseInt(chapter) - 1).toString()}/${previousVerse}`;
+        return `/bible/verse/${book}/${(parseInt(chapter) - 1).toString()}/${previousVerse}`;
     } else
-        return `/verse/${book}/${chapter}/${(parseInt(verse) - 1).toString()}`;
+        return `/bible/verse/${book}/${chapter}/${(parseInt(verse) - 1).toString()}`;
 }
 
 async function followingVerseValue() {
