@@ -1,6 +1,6 @@
 ---
-import Navbar from "../components/Navbar.astro"
-import { ViewTransitions } from 'astro:transitions';
+import Navbar from "../components/Navbar.astro";
+import { ClientRouter } from "astro:transitions";
 ---
 
 <html lang="en">
@@ -10,18 +10,16 @@ import { ViewTransitions } from 'astro:transitions';
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
         <title>OrthodoxScripture</title>
-        <ViewTransitions />
+        <ClientRouter />
     </head>
     <body style="font-family: closer;">
         <Navbar />
         <div id="content">
             <slot />
         </div>
-        
-    </body>
-    <style>
-
-        html, body {
+    </body><style>
+        html,
+        body {
             margin: 0;
             padding: 0;
             background-color: #202327;
@@ -39,7 +37,5 @@ import { ViewTransitions } from 'astro:transitions';
             margin: 10px;
             padding: 10px;
         }
-
-
     </style>
 </html>

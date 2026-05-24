@@ -5,14 +5,15 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "BUN_NODE=1 astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
     "@astrojs/vercel": "^10.0.7",
-    "astro": "^4.16.10",
+    "astro": "^6.3.7",
     "escape-string-regexp": "^5.0.0",
-    "sanitize-html": "^2.13.1"
+    "sanitize-html": "^2.13.1",
+    "vite": "^8.0.14"
   }
 }
