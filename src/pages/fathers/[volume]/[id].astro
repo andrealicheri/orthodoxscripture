@@ -24,8 +24,8 @@ while ((match = nextRegex.exec(content)) !== null) {
   nextMatches.push(match[1]); // Push the captured href value
 }
 
-const previousLink = prevMatches[0]
-const followingLink = nextMatches[0]
+const previousLink = prevMatches[0].slice(0, -5);
+const followingLink = nextMatches[0].slice(0, -5);
 
 
 function getFormattedTitle(inputString) {
